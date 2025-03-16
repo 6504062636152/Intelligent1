@@ -15,7 +15,7 @@ from tensorflow.keras.models import load_model
 import matplotlib.pyplot as plt
 
 # โหลดโมเดลที่ฝึกไว้
-mnist_model = load_model("mnist_model.h5")
+mnist_model = load_model("/absolute/path/to/mnist_model.h5")
 cifar10_model = load_model("cifar10_model.h5")
 
 # โหลดข้อมูลตัวอย่าง MNIST และ CIFAR-10
