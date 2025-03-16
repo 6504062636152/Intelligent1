@@ -1,19 +1,32 @@
+import numpy as np
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from tensorflow.keras.utils import to_categorical
 
-# โหลด CIFAR-10 Dataset
+# 1️⃣ โหลด CIFAR-10 Dataset
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
-X_train, X_test = X_train / 255.0, X_test / 255.0
 
-# แปลง Label เป็น One-Hot Encoding
+# 2️⃣ แสดงภาพตัวอย่างจาก Dataset
+class_names = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+fig, axes = plt.subplots(1, 5, figsize=(10, 3))
+for i, ax in enumerate(axes):
+    ax.imshow(X_train[i])
+    ax.set_title(class_names[y_train[i][0]])
+    ax.axis("off")
+plt.show()
+
+# 3️⃣ ทำ Data Preprocessing
+X_train = X_train.astype("float32") / 255.0
+X_test = X_test.astype("float32") / 255.0
+
 y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
 
-# สร้างโมเดล CNN สำหรับ CIFAR-10
-cifar10_model = Sequential([
+# 4️⃣ สร้างโมเดล CNN
+model = Sequential([
     Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
     MaxPooling2D((2, 2)),
     Conv2D(64, (3, 3), activation='relu'),
@@ -24,9 +37,31 @@ cifar10_model = Sequential([
     Dense(10, activation='softmax')
 ])
 
-# คอมไพล์และฝึกสอนโมเดล
-cifar10_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-cifar10_model.fit(X_train, y_train, epochs=10, batch_size=64, validation_data=(X_test, y_test))
+# 5️⃣ คอมไพล์และฝึกสอนโมเดล
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+history = model.fit(X_train, y_train, epochs=10, batch_size=64, validation_data=(X_test, y_test))
 
-# บันทึกโมเดล
-cifar10_model.save("cifar10_model.h5")
+# 6️⃣ ประเมินผลโมเดล
+loss, acc = model.evaluate(X_test, y_test)
+print(f"Test Accuracy: {acc:.4f}")
+
+# 7️⃣ แสดงกราฟ Loss และ Accuracy
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+plt.plot(history.history['loss'], label='Train Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.title('Loss Over Epochs')
+plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['accuracy'], label='Train Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.title('Accuracy Over Epochs')
+plt.legend()
+
+plt.show()
